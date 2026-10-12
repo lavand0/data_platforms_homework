@@ -53,3 +53,7 @@ COMMON_ENV=(
   "DATA_DIR=${DATA_DIR}"
   "LOG_DIR=${LOG_DIR}"
 )
+
+daemon_running() {
+  run_on "$1" "p=\$(cat ${DATA_DIR}/pids/hadoop-${HADOOP_USER}-$2.pid 2>/dev/null) && ps -o args= -p \"\$p\" | grep -q -- -Dproc_$2"
+}

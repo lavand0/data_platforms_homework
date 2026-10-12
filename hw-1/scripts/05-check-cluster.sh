@@ -15,10 +15,9 @@ check() {
   fi
 }
 
-running()       { run_on "$1" "pgrep -u ${HADOOP_USER} -f proc_$2"; }
 safemode_off()  { hdfs_as_hadoop "$NN_HOST" "dfsadmin -safemode get" | grep -q OFF; }
 fsck_healthy()  { hdfs_as_hadoop "$NN_HOST" "fsck /" | grep -q HEALTHY; }
-no_log_errors() { ! run_on "$1" "grep -hE ' (ERROR|FATAL) ' ${LOG_DIR}/*.log | grep -v 'RECEIVED SIGNAL'"; }
+no_log_errors() { ! run_on "$1" "grep -hE ' (ERROR|FATAL) ' ${LOG_DIR}/*.log ${LOG_DIR}/*.out | grep -v 'RECEIVED SIGNAL'"; }
 smoke_test() {
   run_on "$NN_HOST" "head -c 5M /dev/urandom > /tmp/smoke.bin && chmod 644 /tmp/smoke.bin" \
     && hdfs_as_hadoop "$NN_HOST" "dfs -mkdir -p /tmp" \
@@ -26,18 +25,22 @@ smoke_test() {
     && hdfs_as_hadoop "$NN_HOST" "fsck /tmp/smoke.bin -files -blocks" | grep -q "Live_repl=${REPLICATION}"
 }
 
-jmx="$(run_on "$NN_HOST" "curl -fsS 'http://localhost:${NN_HTTP_PORT}/jmx?qry=Hadoop:service=NameNode,name=FSNamesystemState'" 2>/dev/null || true)"
-jget() { sed -nE "s/.*\"$1\" *: *\"?([^\",}]*)\"?.*/\1/p" <<<"$jmx" | head -1; }
+dn_report() {
+  hdfs_as_hadoop "$NN_HOST" "dfsadmin -report -$1" 2>/dev/null | sed -nE 's/^[A-Za-z]+ datanodes \(([0-9]+)\).*/\1/p' | head -1
+}
+jmx="$(run_on "$NN_HOST" "curl --noproxy '*' -fsS 'http://localhost:${NN_HTTP_PORT}/jmx?qry=Hadoop:service=NameNode,name=FSNamesystemState'" 2>/dev/null || true)"
 dn_count=$(wc -w <<<"$DN_HOSTS")
-live=$(jget NumLiveDataNodes); dead=$(jget NumDeadDataNodes); stale=$(jget NumStaleDataNodes)
+live=$(dn_report live); dead=$(dn_report dead); decom=$(dn_report decommissioning)
+stale=$(sed -nE 's/.*"NumStaleDataNodes" *: *([0-9]+).*/\1/p' <<<"$jmx" | head -1)
 
 log "Проверка кластера $(date '+%F %T')"
-check "NameNode на $NN_HOST" running "$NN_HOST" namenode
-check "Secondary NameNode на $SNN_HOST" running "$SNN_HOST" secondarynamenode
-for h in $DN_HOSTS; do check "DataNode на $h" running "$h" datanode; done
+check "NameNode на $NN_HOST" daemon_running "$NN_HOST" namenode
+check "Secondary NameNode на $SNN_HOST" daemon_running "$SNN_HOST" secondarynamenode
+for h in $DN_HOSTS; do check "DataNode на $h" daemon_running "$h" datanode; done
 check "Живых DataNode: ${live:-?} из $dn_count" test "$live" = "$dn_count"
 check "Мёртвых DataNode: ${dead:-?}" test "$dead" = 0
-check "Устаревших DataNode: ${stale:-?}" test "$stale" = 0
+check "Выводимых из эксплуатации DataNode: ${decom:-?}" test "$decom" = 0
+check "Веб-интерфейс NameNode: устаревших DataNode ${stale:-?}" test "$stale" = 0
 check "Safe mode выключен" safemode_off
 check "Запись файла с репликацией $REPLICATION" smoke_test
 check "fsck / HEALTHY" fsck_healthy

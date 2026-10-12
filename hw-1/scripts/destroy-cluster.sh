@@ -15,7 +15,7 @@ fi
 
 log "Удаление данных HDFS и логов"
 for h in $CLUSTER_HOSTS; do
-  run_on "$h" "rm -rf ${DATA_DIR:?}/nn/* ${DATA_DIR:?}/snn/* ${DATA_DIR:?}/dn/* ${DATA_DIR:?}/tmp/* ${LOG_DIR:?}/*"
+  run_on "$h" "rm -rf ${DATA_DIR:?}/nn/* ${DATA_DIR:?}/snn/* ${DATA_DIR:?}/dn/* ${DATA_DIR:?}/tmp/* ${DATA_DIR:?}/pids/* ${LOG_DIR:?}/*"
 done
 
 if [[ $purge -eq 1 ]]; then

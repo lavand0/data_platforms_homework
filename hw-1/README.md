@@ -117,7 +117,7 @@ sudo -u hadoop /opt/hadoop/bin/hdfs --daemon start secondarynamenode
 ```
 
 Скрипт проверяет демоны, 3 живых DataNode без мёртвых и устаревших, safe mode, запись файла с `Live_repl=3`,
-`fsck /` и отсутствие ERROR/FATAL в логах. В конце выводится `ИТОГ: кластер целостный`, отчёт сохраняется в `reports/`.
+`fsck /` и отсутствие ERROR/FATAL в логах. В конце выводится `ИТОГ: кластер целостный`.
 
 Вручную на `team-17-nn`:
 
@@ -127,12 +127,16 @@ sudo -u hadoop /opt/hadoop/bin/hdfs fsck /             # Status: HEALTHY
 grep -E ' (ERROR|FATAL) ' /var/log/hadoop/*.log        # пусто (на каждом узле)
 ```
 
-Веб-интерфейс NameNode — через туннель с локальной машины:
+Веб-интерфейс NameNode можно посмотреть через туннель с локальной машины:
 
 ```bash
 ssh -L 9870:team-17-nn:9870 team@178.236.27.243
 ```
 
-На <http://localhost:9870> должно быть `Live Nodes: 3` и `Dead Nodes: 0`.
+На <http://localhost:9870> проверяем целостность кластера, должно быть `Live Nodes: 3` и `Dead Nodes: 0`.
 
-![NameNode UI](docs/namenode-ui.png)
+## Скриншоты из UI с рабочим кластером
+
+![DataNode UI](cluster_works_1.png)
+![Overview UI](cluster_works_2.png)
+
