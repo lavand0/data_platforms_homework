@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+  <property>
+    <name>dfs.replication</name>
+    <value>__REPLICATION__</value>
+  </property>
+
+  <property>
+    <name>dfs.namenode.name.dir</name>
+    <value>file://__DATA_DIR__/nn</value>
+  </property>
+  <property>
+    <name>dfs.namenode.http-address</name>
+    <value>__NN_HOST__:__NN_HTTP_PORT__</value>
+  </property>
+  <property>
+    <name>dfs.namenode.rpc-bind-host</name>
+    <value>0.0.0.0</value>
+  </property>
+  <property>
+    <name>dfs.namenode.http-bind-host</name>
+    <value>0.0.0.0</value>
+  </property>
+
+  <property>
+    <name>dfs.namenode.secondary.http-address</name>
+    <value>__SNN_HOST__:__SNN_HTTP_PORT__</value>
+  </property>
+  <property>
+    <name>dfs.namenode.checkpoint.dir</name>
+    <value>file://__DATA_DIR__/snn</value>
+  </property>
+  <property>
+    <name>dfs.namenode.checkpoint.period</name>
+    <value>3600</value>
+  </property>
+  <property>
+    <name>dfs.namenode.checkpoint.txns</name>
+    <value>1000000</value>
+  </property>
+
+  <property>
+    <name>dfs.datanode.data.dir</name>
+    <value>file://__DATA_DIR__/dn</value>
+  </property>
+
+  <property>
+    <name>dfs.permissions.superusergroup</name>
+    <value>__HADOOP_USER__</value>
+  </property>
+</configuration>
