@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="configuration.xsl"?>
+<configuration>
+  <property>
+    <name>hive.metastore.uris</name>
+    <value>thrift://__HIVE_HOST__:__METASTORE_PORT__</value>
+  </property>
+  <property>
+    <name>hive.metastore.warehouse.dir</name>
+    <value>__HIVE_WAREHOUSE__</value>
+  </property>
+</configuration>
